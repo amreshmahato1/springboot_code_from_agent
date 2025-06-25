@@ -1,71 +1,37 @@
 package com.example.project.service;
 
 import com.example.project.dto.MilestoneRequestDTO;
-import com.example.project.dto.MilestoneResponseDTO;
 import com.example.project.entity.Milestone;
-import com.example.project.exception.MilestoneNotFoundException;
+import com.example.project.exception.ResourceNotFoundException;
 import com.example.project.repository.MilestoneRepository;
-import com.example.project.utility.ValidationUtil;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.project.util.ValidationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class MilestoneService {
     private final MilestoneRepository milestoneRepository;
     private final ValidationUtil validationUtil;
 
-    @Autowired
-    public MilestoneService(MilestoneRepository milestoneRepository, ValidationUtil validationUtil) {
-        this.milestoneRepository = milestoneRepository;
-        this.validationUtil = validationUtil;
-    }
-
     @Transactional
-    public MilestoneResponseDTO createMilestone(MilestoneRequestDTO request) {
-        // Unique title validation (project or group)
-        if (request.getProjectId() != null) {
-            validationUtil.validateMilestoneTitleUnique(
-                milestoneRepository.findByTitleAndProjectId(request.getTitle(), request.getProjectId()),
-                request.getTitle()
-            );
-        } else if (request.getGroupId() != null) {
-            validationUtil.validateMilestoneTitleUnique(
-                milestoneRepository.findByTitleAndGroupId(request.getTitle(), request.getGroupId()),
-                request.getTitle()
-            );
+    public Milestone createMilestone(MilestoneRequestDTO dto) {
+        if (milestoneRepository.existsByName(dto.getName())) {
+            throw new IllegalArgumentException("Milestone name already exists.");
         }
-        // Date range validation
-        validationUtil.validateDateRange(request.getStartDate(), request.getDueDate());
-        // Map DTO to entity
-        Milestone milestone = new Milestone();
-        milestone.setTitle(request.getTitle());
-        milestone.setDescription(request.getDescription());
-        milestone.setStartDate(request.getStartDate());
-        milestone.setDueDate(request.getDueDate());
-        milestone.setState(request.getState());
-        milestone.setProjectId(request.getProjectId());
-        milestone.setGroupId(request.getGroupId());
-        Milestone saved = milestoneRepository.save(milestone);
-        // Map entity to response DTO
-        return mapToResponseDTO(saved);
+        validationUtil.validateDueDate(dto.getDueDate());
+        Milestone milestone = Milestone.builder()
+                .name(dto.getName())
+                .description(dto.getDescription())
+                .dueDate(dto.getDueDate())
+                .build();
+        return milestoneRepository.save(milestone);
     }
 
-    public Milestone findMilestoneOrThrow(Long milestoneId) {
-        return milestoneRepository.findById(milestoneId)
-                .orElseThrow(() -> new MilestoneNotFoundException("Milestone not found with id: " + milestoneId));
-    }
-
-    private MilestoneResponseDTO mapToResponseDTO(Milestone milestone) {
-        MilestoneResponseDTO dto = new MilestoneResponseDTO();
-        dto.setId(milestone.getId());
-        dto.setTitle(milestone.getTitle());
-        dto.setDescription(milestone.getDescription());
-        dto.setStartDate(milestone.getStartDate());
-        dto.setDueDate(milestone.getDueDate());
-        dto.setState(milestone.getState());
-        dto.setProjectId(milestone.getProjectId());
-        dto.setGroupId(milestone.getGroupId());
-        return dto;
+    @Transactional(readOnly = true)
+    public Milestone getMilestone(Long id) {
+        return milestoneRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Milestone not found with id: " + id));
     }
 }
