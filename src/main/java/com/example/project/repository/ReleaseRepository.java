@@ -1,13 +1,17 @@
 package com.example.project.repository;
 
 import com.example.project.entity.Release;
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
+import java.util.List;
 
 @Repository
-public interface ReleaseRepository extends JpaRepository<Release, Long> {
-    Optional<Release> findByTagAndProjectId(String tag, Long projectId);
-    Optional<Release> findByIdAndMilestoneId(Long id, Long milestoneId);
+public interface ReleaseRepository extends MongoRepository<Release, String> {
+    // Find release by tag within a project
+    Optional<Release> findByTagAndProjectId(String tag, String projectId);
+
+    // Find all releases by project
+    List<Release> findByProjectId(String projectId);
 }
