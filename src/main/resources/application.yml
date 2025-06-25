@@ -1,8 +1,8 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/milestone_db
-    username: milestone_user
-    password: milestone_pass
+    url: jdbc:postgresql://localhost:5432/milestone_release_db
+    username: postgres
+    password: password
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
@@ -13,10 +13,6 @@ spring:
         format_sql: true
   jackson:
     serialization:
-      INDENT_OUTPUT: true
+      write-dates-as-timestamps: false
 server:
   port: 8080
-logging:
-  level:
-    root: INFO
-    com.example.project: DEBUG
