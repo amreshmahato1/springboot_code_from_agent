@@ -1,31 +1,57 @@
 package com.example.project.entity;
 
-import jakarta.persistence.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 import jakarta.validation.constraints.NotBlank;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
+import jakarta.validation.constraints.Size;
 
-@Entity
-@Table(name = "releases")
+@Document(collection = "release")
 public class Release {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
     @NotBlank
-    @Column(nullable = false)
-    private String tagName;
+    @Size(max = 50)
+    private String tag;
 
-    @Column(length = 1024)
+    @Size(max = 500)
     private String description;
 
-    @Column(nullable = false)
-    private LocalDate releasedAt;
+    @NotBlank
+    private String projectId;
 
-    @ManyToMany(mappedBy = "releases")
-    private Set<Milestone> milestones = new HashSet<>();
+    @NotBlank
+    private String milestoneId;
 
-    // Getters and Setters
-    // ...
+    // Getters and setters
+    public String getId() {
+        return id;
+    }
+    public void setId(String id) {
+        this.id = id;
+    }
+    public String getTag() {
+        return tag;
+    }
+    public void setTag(String tag) {
+        this.tag = tag;
+    }
+    public String getDescription() {
+        return description;
+    }
+    public void setDescription(String description) {
+        this.description = description;
+    }
+    public String getProjectId() {
+        return projectId;
+    }
+    public void setProjectId(String projectId) {
+        this.projectId = projectId;
+    }
+    public String getMilestoneId() {
+        return milestoneId;
+    }
+    public void setMilestoneId(String milestoneId) {
+        this.milestoneId = milestoneId;
+    }
 }
