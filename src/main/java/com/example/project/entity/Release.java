@@ -2,13 +2,16 @@ package com.example.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.util.List;
 
 @Entity
-@Table(name = "release")
-@Data
+@Table(
+    name = "release",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"tag", "project_id"})
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -17,24 +20,16 @@ public class Release {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 50, unique = true)
-    private String version;
+    @Column(nullable = false)
+    private String tag;
 
-    @Column(length = 500)
+    @Column(length = 2048)
     private String description;
 
-    @Column(name = "release_date")
-    private LocalDate releaseDate;
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
 
-    @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Milestone> milestones;
-
-    @Column(nullable = false, length = 50)
-    private String status;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "milestone_id", referencedColumnName = "id", nullable = true)
+    private Milestone milestone;
 }
