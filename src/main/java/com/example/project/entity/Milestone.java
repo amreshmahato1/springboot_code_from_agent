@@ -1,44 +1,49 @@
 package com.example.project.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(
-    name = "milestone",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"title", "project_id", "group_id"})
-    }
-)
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "milestones", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"title", "project_id"}),
+        @UniqueConstraint(columnNames = {"title", "group_id"})
+})
 public class Milestone {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
     private String title;
 
-    @Column(length = 2048)
+    @Column(length = 1024)
     private String description;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
-
-    @Column(name = "due_date", nullable = false)
+    @NotNull
+    @Column(nullable = false)
     private LocalDate dueDate;
 
-    @Column(nullable = false)
-    private String state;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "project_id")
+    private Project project;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "group_id")
+    private Group group;
 
-    @Column(name = "group_id", nullable = false)
-    private Long groupId;
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "milestone_releases",
+            joinColumns = @JoinColumn(name = "milestone_id"),
+            inverseJoinColumns = @JoinColumn(name = "release_id")
+    )
+    private Set<Release> releases = new HashSet<>();
+
+    // Getters and Setters
+    // ...
 }
