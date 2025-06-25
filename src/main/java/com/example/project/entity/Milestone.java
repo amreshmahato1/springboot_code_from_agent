@@ -2,12 +2,17 @@ package com.example.project.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Entity
-@Table(name = "milestone")
-@Data
+@Table(
+    name = "milestone",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"title", "project_id", "group_id"})
+    }
+)
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -16,25 +21,24 @@ public class Milestone {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String name;
+    @Column(nullable = false)
+    private String title;
 
-    @Column(length = 500)
+    @Column(length = 2048)
     private String description;
 
-    @Column(name = "due_date")
+    @Column(name = "start_date", nullable = false)
+    private LocalDate startDate;
+
+    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "release_id")
-    private Release release;
+    @Column(nullable = false)
+    private String state;
 
-    @Column(nullable = false, length = 50)
-    private String status;
+    @Column(name = "project_id", nullable = false)
+    private Long projectId;
 
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private Instant createdAt;
-
-    @Column(name = "updated_at")
-    private Instant updatedAt;
+    @Column(name = "group_id", nullable = false)
+    private Long groupId;
 }
