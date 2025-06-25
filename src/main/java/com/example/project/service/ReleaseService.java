@@ -1,28 +1,40 @@
 package com.example.project.service;
 
+import com.example.project.dto.ReleaseRequestDTO;
+import com.example.project.entity.Milestone;
 import com.example.project.entity.Release;
-import com.example.project.exception.ReleaseNotFoundException;
+import com.example.project.exception.ResourceNotFoundException;
+import com.example.project.repository.MilestoneRepository;
 import com.example.project.repository.ReleaseRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.project.util.ValidationUtil;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-
-import java.util.Optional;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
+@RequiredArgsConstructor
 public class ReleaseService {
     private final ReleaseRepository releaseRepository;
+    private final MilestoneRepository milestoneRepository;
+    private final ValidationUtil validationUtil;
 
-    @Autowired
-    public ReleaseService(ReleaseRepository releaseRepository) {
-        this.releaseRepository = releaseRepository;
+    @Transactional
+    public Release createRelease(ReleaseRequestDTO dto) {
+        if (releaseRepository.existsByVersion(dto.getVersion())) {
+            throw new IllegalArgumentException("Release version already exists.");
+        }
+        validationUtil.validateReleaseDate(dto.getReleaseDate());
+        Release release = Release.builder()
+                .version(dto.getVersion())
+                .description(dto.getDescription())
+                .releaseDate(dto.getReleaseDate())
+                .build();
+        return releaseRepository.save(release);
     }
 
-    public Release findReleaseOrThrow(Long releaseId) {
-        return releaseRepository.findById(releaseId)
-                .orElseThrow(() -> new ReleaseNotFoundException("Release not found with id: " + releaseId));
-    }
-
-    public Optional<Release> findByTagAndProjectId(String tag, Long projectId) {
-        return releaseRepository.findByTagAndProjectId(tag, projectId);
+    @Transactional(readOnly = true)
+    public Release getRelease(Long id) {
+        return releaseRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Release not found with id: " + id));
     }
 }
