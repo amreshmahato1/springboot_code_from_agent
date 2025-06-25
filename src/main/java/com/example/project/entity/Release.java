@@ -1,35 +1,31 @@
 package com.example.project.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
+import jakarta.validation.constraints.NotBlank;
+import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Table(
-    name = "release",
-    uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"tag", "project_id"})
-    }
-)
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "releases")
 public class Release {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotBlank
     @Column(nullable = false)
-    private String tag;
+    private String tagName;
 
-    @Column(length = 2048)
+    @Column(length = 1024)
     private String description;
 
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    @Column(nullable = false)
+    private LocalDate releasedAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "milestone_id", referencedColumnName = "id", nullable = true)
-    private Milestone milestone;
+    @ManyToMany(mappedBy = "releases")
+    private Set<Milestone> milestones = new HashSet<>();
+
+    // Getters and Setters
+    // ...
 }
