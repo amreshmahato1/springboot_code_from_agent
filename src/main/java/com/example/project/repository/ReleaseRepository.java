@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface ReleaseRepository extends JpaRepository<Release, Long> {
     Optional<Release> findByTagAndProjectId(String tag, Long projectId);
+    Optional<Release> findByIdAndMilestoneId(Long id, Long milestoneId);
 }
