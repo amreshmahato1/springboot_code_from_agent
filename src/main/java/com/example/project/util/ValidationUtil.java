@@ -1,28 +1,29 @@
 package com.example.project.util;
 
+import com.example.project.entity.Milestone;
+import com.example.project.entity.Release;
 import org.springframework.stereotype.Component;
+
 import java.time.LocalDate;
-import java.util.regex.Pattern;
 
 @Component
 public class ValidationUtil {
-    private static final Pattern NAME_PATTERN = Pattern.compile("^[A-Za-z0-9 _-]{3,50}$");
-
-    public boolean isValidMilestoneName(String name) {
-        return name != null && NAME_PATTERN.matcher(name).matches();
+    public void validateDateRange(LocalDate startDate, LocalDate dueDate) {
+        if (startDate.isAfter(dueDate)) {
+            throw new com.example.project.exception.InvalidDateRangeException("Start date must be before or equal to due date.");
+        }
     }
 
-    public boolean isValidMilestoneDates(LocalDate startDate, LocalDate endDate) {
-        return startDate != null && endDate != null && endDate.isAfter(startDate);
+    public void validateMilestoneProjectOrGroup(Milestone milestone) {
+        if ((milestone.getProjectId() == null && milestone.getGroupId() == null) ||
+            (milestone.getProjectId() != null && milestone.getGroupId() != null)) {
+            throw new IllegalArgumentException("Milestone must belong to either a project or a group, not both or neither.");
+        }
     }
 
-    public boolean isValidReleaseName(String name) {
-        return name != null && NAME_PATTERN.matcher(name).matches();
+    public void validateReleaseNotAlreadyAssociated(Release release) {
+        if (release.getMilestoneId() != null) {
+            throw new com.example.project.exception.ReleaseAlreadyAssociatedException("Release is already associated with a milestone.");
+        }
     }
-
-    public boolean isValidReleaseDates(LocalDate startDate, LocalDate endDate) {
-        return startDate != null && endDate != null && endDate.isAfter(startDate);
-    }
-
-    // Add more reusable validation methods as needed
 }
