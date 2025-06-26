@@ -1,28 +1,38 @@
 package com.example.project.dto;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Future;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Data
-@Schema(description = "Request DTO for creating a milestone")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class MilestoneCreateRequest {
-    @NotBlank
-    @Size(max = 100)
-    @Schema(description = "Milestone name", example = "Alpha Release", required = true)
-    private String name;
+
+    @NotNull
+    @Size(min = 1, max = 100)
+    private String title;
 
     @Size(max = 500)
-    @Schema(description = "Milestone description", example = "Initial alpha release milestone")
     private String description;
 
     @NotNull
-    @Future
-    @Schema(description = "Due date for the milestone", example = "2024-12-31T23:59:59", required = true)
-    private LocalDateTime dueDate;
+    @FutureOrPresent
+    private LocalDate startDate;
+
+    @NotNull
+    @FutureOrPresent
+    private LocalDate dueDate;
+
+    @NotNull
+    private String projectId;
+
+    private String groupId;
 }
