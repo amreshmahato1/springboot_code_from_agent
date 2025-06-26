@@ -1,29 +1,29 @@
 package com.example.project.dto;
 
-import jakarta.validation.constraints.*;
-import lombok.*;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.AllArgsConstructor;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.util.List;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class MilestoneDto {
-    private Long id;
-
+    private String id;
     @NotBlank
-    @Size(max = 100)
-    private String name;
-
-    @Size(max = 255)
+    private String title;
     private String description;
-
+    @NotNull
+    private LocalDate startDate;
     @NotNull
     private LocalDate dueDate;
-
-    @NotNull
-    private Long releaseId;
-
-    private boolean completed;
+    @NotBlank
+    private String state;
+    @NotBlank
+    private String projectId;
+    private String groupId;
+    private List<ReleaseDto> releases;
 }
