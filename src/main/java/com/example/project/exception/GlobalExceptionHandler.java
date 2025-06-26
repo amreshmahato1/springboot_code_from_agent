@@ -6,6 +6,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -43,10 +44,10 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, Object>> handleValidationException(MethodArgumentNotValidException ex) {
-        Map<String, Object> error = new HashMap<>();
-        error.put("code", HttpStatus.BAD_REQUEST.value());
-        error.put("message", ex.getBindingResult().getFieldError().getDefaultMessage());
-        return new ResponseEntity<>(error, HttpStatus.BAD_REQUEST);
+        StringBuilder errorMsg = new StringBuilder();
+        ex.getBindingResult().getFieldErrors().forEach(error ->
+                errorMsg.append(error.getField()).append(": ").append(error.getDefaultMessage()).append("; "));
+        return buildErrorResponse(errorMsg.toString(), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)
@@ -56,7 +57,9 @@ public class GlobalExceptionHandler {
 
     private ResponseEntity<Map<String, Object>> buildErrorResponse(String message, HttpStatus status) {
         Map<String, Object> error = new HashMap<>();
-        error.put("code", status.value());
+        error.put("timestamp", LocalDateTime.now());
+        error.put("status", status.value());
+        error.put("error", status.getReasonPhrase());
         error.put("message", message);
         return new ResponseEntity<>(error, status);
     }
