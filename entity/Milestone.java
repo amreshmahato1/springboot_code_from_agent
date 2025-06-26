@@ -1,112 +1,53 @@
 package com.example.project.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.CompoundIndex;
+import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.DBRef;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "milestone",
-       uniqueConstraints = {
-           @UniqueConstraint(columnNames = {"title", "project_id", "group_id"})
-       })
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * Milestone entity representing a project milestone in MongoDB.
+ */
+@Document(collection = "milestone")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@CompoundIndexes({
+    @CompoundIndex(name = "unique_milestone_name_release", def = "{'name': 1, 'releaseId': 1}", unique = true)
+})
 public class Milestone {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @NotBlank
-    @Size(max = 255)
-    @Column(nullable = false)
-    private String title;
+    @Indexed
+    private String name;
 
-    @Size(max = 2000)
     private String description;
 
-    @NotNull
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
-
-    @NotNull
-    @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
 
-    @NotBlank
-    @Size(max = 50)
-    @Column(nullable = false)
-    private String state;
+    /**
+     * Reference to the associated Release (by release id)
+     */
+    @Indexed
+    private String releaseId;
 
-    @NotNull
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    /**
+     * Status of the milestone (e.g., PLANNED, IN_PROGRESS, COMPLETED)
+     */
+    private String status;
 
-    @NotNull
-    @Column(name = "group_id", nullable = false)
-    private Long groupId;
+    /**
+     * List of tags or labels for the milestone
+     */
+    private List<String> tags;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(LocalDate dueDate) {
-        this.dueDate = dueDate;
-    }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public Long getGroupId() {
-        return groupId;
-    }
-
-    public void setGroupId(Long groupId) {
-        this.groupId = groupId;
-    }
+    // Add additional fields and validation as per LLD
 }
