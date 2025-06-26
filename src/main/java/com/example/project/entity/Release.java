@@ -1,34 +1,37 @@
 package com.example.project.entity;
 
 import jakarta.persistence.*;
-import lombok.*;
-import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 
 @Entity
-@Table(name = "release")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
+@Table(name = "releases", uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"tag", "project_id"})
+})
 public class Release {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, length = 100)
-    private String version;
+    @Column(nullable = false)
+    private String tag;
 
-    @Column(length = 255)
+    @Column(length = 1024)
     private String description;
 
     @Column(nullable = false)
-    private LocalDate releaseDate;
+    private Long projectId;
 
-    @OneToMany(mappedBy = "release", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Milestone> milestones = new HashSet<>();
+    @Column
+    private Long milestoneId;
 
-    // Additional fields and relationships as per LLD
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+    public String getTag() { return tag; }
+    public void setTag(String tag) { this.tag = tag; }
+    public String getDescription() { return description; }
+    public void setDescription(String description) { this.description = description; }
+    public Long getProjectId() { return projectId; }
+    public void setProjectId(Long projectId) { this.projectId = projectId; }
+    public Long getMilestoneId() { return milestoneId; }
+    public void setMilestoneId(Long milestoneId) { this.milestoneId = milestoneId; }
 }
