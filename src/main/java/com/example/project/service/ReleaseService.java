@@ -1,43 +1,36 @@
 package com.example.project.service;
 
 import com.example.project.entity.Release;
-import com.example.project.entity.Milestone;
+import com.example.project.exception.ReleaseNotFoundException;
+import com.example.project.exception.ReleaseTagNotUniqueException;
 import com.example.project.repository.ReleaseRepository;
-import com.example.project.repository.MilestoneRepository;
-import com.example.project.exception.ValidationException;
-import com.example.project.util.ValidationUtil;
-import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ReleaseService {
     private final ReleaseRepository releaseRepository;
-    private final MilestoneRepository milestoneRepository;
-    private final ValidationUtil validationUtil;
 
     @Autowired
-    public ReleaseService(ReleaseRepository releaseRepository, MilestoneRepository milestoneRepository, ValidationUtil validationUtil) {
+    public ReleaseService(ReleaseRepository releaseRepository) {
         this.releaseRepository = releaseRepository;
-        this.milestoneRepository = milestoneRepository;
-        this.validationUtil = validationUtil;
     }
 
-    public Release associateWithMilestone(String releaseId, String milestoneId) {
-        Release release = releaseRepository.findById(releaseId)
-                .orElseThrow(() -> new ValidationException("Release not found"));
-        Milestone milestone = milestoneRepository.findById(milestoneId)
-                .orElseThrow(() -> new ValidationException("Milestone not found"));
-        release.setMilestoneId(milestone.getId());
+    @Transactional(readOnly = true)
+    public Release getReleaseById(Long releaseId) {
+        return releaseRepository.findById(releaseId)
+                .orElseThrow(() -> new ReleaseNotFoundException("Release not found: " + releaseId));
+    }
+
+    @Transactional(readOnly = true)
+    public void validateUniqueTagWithinProject(String tag, Long projectId) {
+        releaseRepository.findByTagAndProjectId(tag, projectId)
+                .ifPresent(r -> { throw new ReleaseTagNotUniqueException("Release tag must be unique within the project."); });
+    }
+
+    @Transactional
+    public Release saveRelease(Release release) {
         return releaseRepository.save(release);
-    }
-
-    public void validateRelease(Release release) {
-        if (!validationUtil.isValidReleaseName(release.getName())) {
-            throw new ValidationException("Invalid release name");
-        }
-        if (!validationUtil.isValidReleaseDates(release.getStartDate(), release.getEndDate())) {
-            throw new ValidationException("Release end date must be after start date");
-        }
-        // Add more validation as per LLD
     }
 }
