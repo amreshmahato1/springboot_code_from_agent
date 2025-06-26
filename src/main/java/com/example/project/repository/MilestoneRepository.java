@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface MilestoneRepository extends JpaRepository<Milestone, Long> {
     Optional<Milestone> findByTitleAndProjectId(String title, Long projectId);
+    Optional<Milestone> findByTitleAndGroupId(String title, Long groupId);
 }
