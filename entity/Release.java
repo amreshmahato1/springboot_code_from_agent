@@ -1,75 +1,41 @@
 package com.example.project.entity;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import lombok.*;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.index.Indexed;
+import org.springframework.data.mongodb.core.mapping.Document;
 
-@Entity
-@Table(name = "release",
-       uniqueConstraints = {
-           @UniqueConstraint(columnNames = {"tag", "project_id"})
-       })
+import java.time.LocalDate;
+import java.util.List;
+
+/**
+ * Release entity representing a software release in MongoDB.
+ */
+@Document(collection = "release")
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Release {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @NotBlank
-    @Size(max = 255)
-    @Column(nullable = false)
-    private String tag;
+    @Indexed(unique = true)
+    private String version;
 
-    @Size(max = 2000)
     private String description;
 
-    @NotNull
-    @Column(name = "project_id", nullable = false)
-    private Long projectId;
+    private LocalDate releaseDate;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "milestone_id", nullable = false, referencedColumnName = "id")
-    private Milestone milestone;
+    /**
+     * Status of the release (e.g., PLANNED, RELEASED, ARCHIVED)
+     */
+    private String status;
 
-    // Getters and Setters
-    public Long getId() {
-        return id;
-    }
+    /**
+     * List of milestone IDs associated with this release (for quick lookup)
+     */
+    private List<String> milestoneIds;
 
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getTag() {
-        return tag;
-    }
-
-    public void setTag(String tag) {
-        this.tag = tag;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public Long getProjectId() {
-        return projectId;
-    }
-
-    public void setProjectId(Long projectId) {
-        this.projectId = projectId;
-    }
-
-    public Milestone getMilestone() {
-        return milestone;
-    }
-
-    public void setMilestone(Milestone milestone) {
-        this.milestone = milestone;
-    }
+    // Add additional fields and validation as per LLD
 }
